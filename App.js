@@ -10,10 +10,12 @@ import EmojiPicker from "./components/EmojiPicker";
 import EmojiList from './components/EmojiList';
 import EmojiSticker from './components/EmojiSticker';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as MediaLibrary from 'expo-media-library';
 
 const PlaceholderImage = require('./assets/images/background-image.png');
 
 export default function App() {
+  const [status, requestPermission] = MediaLibrary.usePermissions();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showAppOptions, setShowAppOptions] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -34,6 +36,11 @@ export default function App() {
   const onSaveImageAsync = async () => {
     // we will implement this later
   };
+
+  if (status === null) {
+    requestPermission();
+  }
+  
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -49,13 +56,14 @@ export default function App() {
   };
   return (
     <GestureHandlerRootView style={styles.container}>
-    <View style={styles.container}>
-    <View style={styles.imageContainer}>
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
           <ImageViewer
           placeholderImageSource={PlaceholderImage}
           selectedImage={selectedImage}
         />
         {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+      </View>
     </View>
     {showAppOptions ? (
             <View style={styles.optionsContainer}>
@@ -70,13 +78,12 @@ export default function App() {
           <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
           <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
         </View>
-        
       )}
+
       <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
       <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
         </EmojiPicker>
-        <StatusBar style="auto" />
-      </View>
+        <StatusBar style="light" />
       </GestureHandlerRootView>
   );
 }
